@@ -1,5 +1,8 @@
+const aasaUrl = new URL('./apple-app-site-association', import.meta.url)
+const assetLinksUrl = new URL('./assetlinks.json', import.meta.url)
+
 const server = Bun.serve({
-  port: Number(Bun.env.PORT),
+  port: Number(Bun.env.PORT ?? 8787),
   development: Bun.env.NODE_ENV !== 'production',
   routes: {
     '/': () => new Response('ok'),
@@ -9,9 +12,7 @@ const server = Bun.serve({
         const ipAddress = server.requestIP(request)
         console.info(`Request from ${ipAddress?.address}`)
 
-        return Response.json(
-          await Bun.file('./apple-app-site-association').json(),
-        )
+        return Response.json(await Bun.file(aasaUrl).json())
       },
     },
     '/.well-known/assetlinks.json': {
@@ -19,7 +20,7 @@ const server = Bun.serve({
         const ipAddress = server.requestIP(request)
         console.info(`Request from ${ipAddress?.address}`)
 
-        return Response.json(await Bun.file('./assetlinks.json').json())
+        return Response.json(await Bun.file(assetLinksUrl).json())
       },
     },
   },

@@ -9,8 +9,8 @@ interface EnvironmentVariables {
   readonly EXPO_PUBLIC_SERVER_DOMAIN: string
   readonly EXPO_PUBLIC_PORTO_BASE_URL: string
 
-  readonly EXPO_TUNNEL_SUBDOMAIN: string
-  readonly EXPO_PUBLIC_TUNNEL_SUBDOMAIN: string
+  // Full tunnel URL, e.g. "https://5650e3201c52.ngrok-free.app"
+  readonly EXPO_TUNNEL_URL: string
 }
 
 declare namespace NodeJS {

@@ -1,20 +1,30 @@
 import 'tsx/cjs'
 import type { ExpoConfig, ConfigContext } from 'expo/config'
+import pkg from './package.json'
 
-const scheme = 'porto-rn'
+const scheme = 'customer-native'
 
 const dev =
   process.env.NODE_ENV === 'development' ||
   process.env.ENVIRONMENT === 'development'
 
-const ngrokDomain = `${process.env.EXPO_TUNNEL_SUBDOMAIN}.ngrok.io`
+// Single strategy: read full tunnel URL and extract host for Associated Domains (guarded)
+function getTunnelHost(): string | undefined {
+  const url = process.env.EXPO_TUNNEL_URL
+  if (!url) return undefined
+  try {
+    return new URL(url).host
+  } catch {
+    return undefined
+  }
+}
+const tunnelHost = getTunnelHost()
 
 export default (context: ConfigContext): ExpoConfig => ({
   ...context.config,
-  slug: scheme,
-  name: scheme,
-  scheme: scheme,
-  version: '1.0.0',
+  slug: pkg.name,
+  name: pkg.name,
+  version: pkg.version,
   newArchEnabled: true,
   userInterfaceStyle: 'automatic',
   platforms: ['android', 'ios', 'web'],
@@ -22,23 +32,22 @@ export default (context: ConfigContext): ExpoConfig => ({
     config: {
       usesNonExemptEncryption: false,
     },
+    buildNumber: pkg.version,
     supportsTablet: true,
-    appleTeamId: 'Q7767Q7TRJ',
-    bundleIdentifier: 'org.name.portorn',
-    associatedDomains: [
-      `applinks:${ngrokDomain}`,
-      `webcredentials:${ngrokDomain}`,
-      `activitycontinuation:${ngrokDomain}`,
-
-      `applinks:${process.env.EXPO_PUBLIC_SERVER_DOMAIN}`,
-      `webcredentials:${process.env.EXPO_PUBLIC_SERVER_DOMAIN}`,
-      `activitycontinuation:${process.env.EXPO_PUBLIC_SERVER_DOMAIN}`,
-    ],
+    appleTeamId: 'JYD77N4AR8',
+    bundleIdentifier: 'com.yelo.noshDelivery',
+    associatedDomains: tunnelHost
+      ? [
+          `applinks:${tunnelHost}`,
+          `webcredentials:${tunnelHost}`,
+          `activitycontinuation:${tunnelHost}`,
+        ]
+      : undefined,
   },
   android: {
     newArchEnabled: true,
     edgeToEdgeEnabled: true,
-    package: 'org.name.portorn',
+    package: 'com.yelo.noshDelivery',
   },
   web: {
     output: 'single',
@@ -50,16 +59,18 @@ export default (context: ConfigContext): ExpoConfig => ({
   },
   extra: {
     eas: {
-      projectId: '2465a0e5-8758-4bbf-8641-49004b3ea709',
+      projectId: '6fba142f-9428-4da0-bd28-fbb809130cf9',
     },
   },
   plugins: [
     [
       'expo-router',
       {
-        origin: `https://${ngrokDomain}`,
+        origin: tunnelHost ? `https://${tunnelHost}` : undefined,
         headOrigin: dev
-          ? `https://${ngrokDomain}`
+          ? tunnelHost
+            ? `https://${tunnelHost}`
+            : undefined
           : `https://${process.env.EXPO_PUBLIC_SERVER_DOMAIN}`,
       },
     ],
